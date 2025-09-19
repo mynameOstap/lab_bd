@@ -5,13 +5,12 @@ COMMON: &common
 development:
   <<: *common
   DEBUG: True
-#  SQLALCHEMY_DATABASE_URI: 'sqlite://'
-#  SQLALCHEMY_DATABASE_URI: 'sqlite:///device_db.sqlite'
+
   SQLALCHEMY_DATABASE_URI: 'mysql://root:1qw23e@localhost:3306/lab4'
 
 production:
   <<: *common
-  SQLALCHEMY_DATABASE_URI: 'mysql://root:AXProduct2024@localhost/test'
+  SQLALCHEMY_DATABASE_URI: 'mysql://root:1qw23e@localhost:3306/lab4'
 
 ADDITIONAL_CONFIG:
   MYSQL_ROOT_USER: root
