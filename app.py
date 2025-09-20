@@ -20,7 +20,8 @@ from my_project import create_app
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    serve(app, host="0.0.0.0", port=5000)
+
     # flask_env = os.environ.get(FLASK_ENV, DEVELOPMENT).lower()
     # config_yaml_path = os.path.join(os.getcwd(), 'config', 'app.yml')
 
