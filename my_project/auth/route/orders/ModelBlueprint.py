@@ -63,15 +63,12 @@ def create_model() -> Response:
               body_type:
                 type: string
                 enum: ["sedan", "hatchback", "suv", "coupe"]
-                description: Type of car body
                 example: "suv"
               engine_id:
                 type: integer
-                description: ID of the engine
                 example: 1
               brand_id:
                 type: integer
-                description: ID of the brand
                 example: 2
     responses:
       201:
