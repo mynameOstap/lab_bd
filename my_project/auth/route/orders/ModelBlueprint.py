@@ -66,16 +66,15 @@ def create_model() -> Response:
                 type: string
                 enum: ["sedan", "hatchback", "suv", "coupe"]
                 description: Type of car body
+                default: "sedan"
               engine_id:
                 type: integer
                 description: ID of the engine
+                default: 1
               brand_id:
                 type: integer
                 description: ID of the brand
-          example:
-            body_type: "sedan"
-            engine_id: 1
-            brand_id: 2
+                default: 1
     responses:
       201:
         description: Model created successfully
@@ -96,9 +95,12 @@ def create_model() -> Response:
               id: 1
               body_type: "sedan"
               engine_id: 1
-              brand_id: 2
+              brand_id: 1
     """
     content = request.get_json()
+    if not content:
+        return make_response(jsonify({"error": "No input data provided"}), HTTPStatus.BAD_REQUEST)
+
     model = Model.create_from_dto(content)
     model_controller.create(model)
     return make_response(jsonify(model.put_into_dto()), HTTPStatus.CREATED)
@@ -181,10 +183,13 @@ def update_model(model_id: int) -> Response:
               body_type:
                 type: string
                 enum: ["sedan", "hatchback", "suv", "coupe"]
+                default: "sedan"
               engine_id:
                 type: integer
+                default: 1
               brand_id:
                 type: integer
+                default: 1
           example:
             body_type: "suv"
             engine_id: 2
@@ -199,6 +204,9 @@ def update_model(model_id: int) -> Response:
             example: "Model updated"
     """
     content = request.get_json()
+    if not content:
+        return make_response(jsonify({"error": "No input data provided"}), HTTPStatus.BAD_REQUEST)
+
     model = Model.create_from_dto(content)
     model_controller.update(model_id, model)
     return make_response("Model updated", HTTPStatus.OK)
