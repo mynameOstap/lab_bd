@@ -5,6 +5,7 @@ from my_project.auth.domain.orders.Model import Model
 
 model_bp = Blueprint('model', __name__, url_prefix='/model')
 
+
 @model_bp.get('')
 def get_all_models() -> Response:
     """
@@ -24,25 +25,22 @@ def get_all_models() -> Response:
                 properties:
                   id:
                     type: integer
+                    example: 1
                   body_type:
                     type: string
+                    enum: ["sedan", "hatchback", "suv", "coupe"]
+                    example: "sedan"
                   engine_id:
                     type: integer
+                    example: 2
                   brand_id:
                     type: integer
-            example:
-              - id: 1
-                body_type: "sedan"
-                engine_id: 1
-                brand_id: 2
-              - id: 2
-                body_type: "suv"
-                engine_id: 2
-                brand_id: 3
+                    example: 3
     """
     models = model_controller.find_all()
     models_dto = [model.put_into_dto() for model in models]
     return make_response(jsonify(models_dto), HTTPStatus.OK)
+
 
 @model_bp.post('')
 def create_model() -> Response:
@@ -66,15 +64,15 @@ def create_model() -> Response:
                 type: string
                 enum: ["sedan", "hatchback", "suv", "coupe"]
                 description: Type of car body
-                default: "sedan"
+                example: "suv"
               engine_id:
                 type: integer
                 description: ID of the engine
-                default: 1
+                example: 1
               brand_id:
                 type: integer
                 description: ID of the brand
-                default: 1
+                example: 2
     responses:
       201:
         description: Model created successfully
@@ -85,17 +83,17 @@ def create_model() -> Response:
               properties:
                 id:
                   type: integer
+                  example: 10
                 body_type:
                   type: string
+                  enum: ["sedan", "hatchback", "suv", "coupe"]
+                  example: "suv"
                 engine_id:
                   type: integer
+                  example: 1
                 brand_id:
                   type: integer
-            example:
-              id: 1
-              body_type: "sedan"
-              engine_id: 1
-              brand_id: 1
+                  example: 2
     """
     content = request.get_json()
     if not content:
@@ -104,6 +102,7 @@ def create_model() -> Response:
     model = Model.create_from_dto(content)
     model_controller.create(model)
     return make_response(jsonify(model.put_into_dto()), HTTPStatus.CREATED)
+
 
 @model_bp.get('/<int:model_id>')
 def get_model(model_id: int) -> Response:
@@ -128,17 +127,17 @@ def get_model(model_id: int) -> Response:
               properties:
                 id:
                   type: integer
+                  example: 5
                 body_type:
                   type: string
+                  enum: ["sedan", "hatchback", "suv", "coupe"]
+                  example: "sedan"
                 engine_id:
                   type: integer
+                  example: 2
                 brand_id:
                   type: integer
-            example:
-              id: 1
-              body_type: "sedan"
-              engine_id: 1
-              brand_id: 2
+                  example: 3
       404:
         description: Model not found
         content:
@@ -148,13 +147,13 @@ def get_model(model_id: int) -> Response:
               properties:
                 error:
                   type: string
-            example:
-              error: "Model not found"
+                  example: "Model not found"
     """
     model = model_controller.find_by_id(model_id)
     if model:
         return make_response(jsonify(model.put_into_dto()), HTTPStatus.OK)
     return make_response(jsonify({"error": "Model not found"}), HTTPStatus.NOT_FOUND)
+
 
 @model_bp.put('/<int:model_id>')
 def update_model(model_id: int) -> Response:
@@ -183,17 +182,13 @@ def update_model(model_id: int) -> Response:
               body_type:
                 type: string
                 enum: ["sedan", "hatchback", "suv", "coupe"]
-                default: "sedan"
+                example: "hatchback"
               engine_id:
                 type: integer
-                default: 1
+                example: 3
               brand_id:
                 type: integer
-                default: 1
-          example:
-            body_type: "suv"
-            engine_id: 2
-            brand_id: 3
+                example: 1
     responses:
       200:
         description: Model updated
@@ -201,7 +196,17 @@ def update_model(model_id: int) -> Response:
           application/json:
             schema:
               type: string
-            example: "Model updated"
+              example: "Model updated"
+      404:
+        description: Model not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: "Model not found"
     """
     content = request.get_json()
     if not content:
@@ -210,6 +215,7 @@ def update_model(model_id: int) -> Response:
     model = Model.create_from_dto(content)
     model_controller.update(model_id, model)
     return make_response("Model updated", HTTPStatus.OK)
+
 
 @model_bp.delete('/<int:model_id>')
 def delete_model(model_id: int) -> Response:
@@ -227,11 +233,16 @@ def delete_model(model_id: int) -> Response:
     responses:
       204:
         description: Model deleted
+      404:
+        description: Model not found
         content:
           application/json:
             schema:
-              type: string
-            example: "Model deleted"
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: "Model not found"
     """
     model_controller.delete(model_id)
     return make_response("Model deleted", HTTPStatus.NO_CONTENT)
