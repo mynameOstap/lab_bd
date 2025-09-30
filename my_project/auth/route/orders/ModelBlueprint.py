@@ -6,7 +6,7 @@ from my_project.auth.domain.orders.Model import Model
 model_bp = Blueprint('model', __name__, url_prefix='/model')
 
 
-@model_bp.get('')
+@model_bp.get('/')
 def get_all_models() -> Response:
     """
     Get all models
