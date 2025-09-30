@@ -15,11 +15,30 @@ def get_all_models() -> Response:
     responses:
       200:
         description: List of models
-        examples:
-          application/json: [
-            {"id": 1, "brand_id": 2, "name": "X5"},
-            {"id": 2, "brand_id": 3, "name": "A6"}
-          ]
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  body_type:
+                    type: string
+                  engine_id:
+                    type: integer
+                  brand_id:
+                    type: integer
+            example:
+              - id: 1
+                body_type: "sedan"
+                engine_id: 1
+                brand_id: 2
+              - id: 2
+                body_type: "suv"
+                engine_id: 2
+                brand_id: 3
     """
     models = model_controller.find_all()
     models_dto = [model.put_into_dto() for model in models]
@@ -36,12 +55,48 @@ def create_model() -> Response:
       required: true
       content:
         application/json:
+          schema:
+            type: object
+            required:
+              - body_type
+              - engine_id
+              - brand_id
+            properties:
+              body_type:
+                type: string
+                enum: ["sedan", "hatchback", "suv", "coupe"]
+                description: Type of car body
+              engine_id:
+                type: integer
+                description: ID of the engine
+              brand_id:
+                type: integer
+                description: ID of the brand
           example:
+            body_type: "sedan"
+            engine_id: 1
             brand_id: 2
-            name: "X5"
     responses:
       201:
         description: Model created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                body_type:
+                  type: string
+                engine_id:
+                  type: integer
+                brand_id:
+                  type: integer
+            example:
+              id: 1
+              body_type: "sedan"
+              engine_id: 1
+              brand_id: 2
     """
     content = request.get_json()
     model = Model.create_from_dto(content)
@@ -64,8 +119,35 @@ def get_model(model_id: int) -> Response:
     responses:
       200:
         description: Model found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                body_type:
+                  type: string
+                engine_id:
+                  type: integer
+                brand_id:
+                  type: integer
+            example:
+              id: 1
+              body_type: "sedan"
+              engine_id: 1
+              brand_id: 2
       404:
         description: Model not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+            example:
+              error: "Model not found"
     """
     model = model_controller.find_by_id(model_id)
     if model:
@@ -89,12 +171,32 @@ def update_model(model_id: int) -> Response:
       required: true
       content:
         application/json:
+          schema:
+            type: object
+            required:
+              - body_type
+              - engine_id
+              - brand_id
+            properties:
+              body_type:
+                type: string
+                enum: ["sedan", "hatchback", "suv", "coupe"]
+              engine_id:
+                type: integer
+              brand_id:
+                type: integer
           example:
+            body_type: "suv"
+            engine_id: 2
             brand_id: 3
-            name: "A6"
     responses:
       200:
         description: Model updated
+        content:
+          application/json:
+            schema:
+              type: string
+            example: "Model updated"
     """
     content = request.get_json()
     model = Model.create_from_dto(content)
@@ -117,6 +219,11 @@ def delete_model(model_id: int) -> Response:
     responses:
       204:
         description: Model deleted
+        content:
+          application/json:
+            schema:
+              type: string
+            example: "Model deleted"
     """
     model_controller.delete(model_id)
     return make_response("Model deleted", HTTPStatus.NO_CONTENT)
