@@ -43,7 +43,16 @@ def get_all_models() -> Response:
     return make_response(jsonify(models_dto), HTTPStatus.OK)
 
 
-@model_bp.post('')
+from http import HTTPStatus
+from typing import Any, Dict, List, Optional
+from flask import Blueprint, jsonify, Response, request, make_response, url_for
+from my_project.auth.controller import model_controller
+from my_project.auth.domain.orders.Model import Model
+
+model_bp = Blueprint("model", __name__, url_prefix="/model")
+
+
+@model_bp.post("/")
 def create_model() -> Response:
     """
     Create a new model
@@ -51,27 +60,28 @@ def create_model() -> Response:
     openapi: 3.0.2
     tags:
       - Models
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - body_type
-              - engine_id
-              - brand_id
-            properties:
-              body_type:
-                type: string
-                enum: ["sedan", "hatchback", "suv", "coupe"]
-                example: "suv"
-              engine_id:
-                type: integer
-                example: 1
-              brand_id:
-                type: integer
-                example: 2
+    summary: Create a new model
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        description: Model DTO
+        schema:
+          type: object
+          properties:
+            body_type:
+              type: string
+              enum: ["sedan", "hatchback", "suv", "coupe"]
+              example: "suv"
+            engine_id:
+              type: integer
+              example: 1
+            brand_id:
+              type: integer
+              example: 2
+          required: [body_type, engine_id, brand_id]
     responses:
       201:
         description: Model created successfully
@@ -93,14 +103,58 @@ def create_model() -> Response:
                 brand_id:
                   type: integer
                   example: 2
+      400:
+        description: Invalid input
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
     """
-    content = request.get_json()
-    if not content:
-        return make_response(jsonify({"error": "No input data provided"}), HTTPStatus.BAD_REQUEST)
+    payload: Optional[Dict[str, Any]] = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return make_response(jsonify({"errors": ["Expected JSON object"]}), HTTPStatus.BAD_REQUEST)
 
-    model = Model.create_from_dto(content)
+    allowed_fields = {"body_type", "engine_id", "brand_id"}
+    required_fields = {"body_type", "engine_id", "brand_id"}
+    errors: List[str] = []
+
+    # Перевірка обовʼязкових полів
+    missing = [f for f in required_fields if f not in payload or payload.get(f) in (None, "")]
+    if missing:
+        errors.append(f"Missing required fields: {', '.join(missing)}")
+
+    dto = {k: payload.get(k) for k in allowed_fields if k in payload}
+
+    # Перевірка числових полів
+    for int_field in ("engine_id", "brand_id"):
+        if int_field in dto:
+            try:
+                dto[int_field] = int(dto[int_field])
+            except (ValueError, TypeError):
+                errors.append(f"Field '{int_field}' must be an integer")
+
+    if errors:
+        return make_response(jsonify({"errors": errors}), HTTPStatus.BAD_REQUEST)
+
+    # Створення моделі та збереження
+    model = Model.create_from_dto(dto)
     model_controller.create(model)
-    return make_response(jsonify(model.put_into_dto()), HTTPStatus.CREATED)
+
+    body = model.put_into_dto()
+    resp = make_response(jsonify(body), HTTPStatus.CREATED)
+
+    # Додаємо Location header для нового ресурсу
+    try:
+        resp.headers["Location"] = url_for("model.get_model", model_id=model.id, _external=True)
+    except Exception:
+        pass
+
+    return resp
 
 
 @model_bp.get('/<int:model_id>')
