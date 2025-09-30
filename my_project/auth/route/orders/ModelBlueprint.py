@@ -11,6 +11,7 @@ def get_all_models() -> Response:
     """
     Get all models
     ---
+    openapi: 3.0.2
     tags:
       - Models
     responses:
@@ -47,6 +48,7 @@ def create_model() -> Response:
     """
     Create a new model
     ---
+    openapi: 3.0.2
     tags:
       - Models
     requestBody:
@@ -106,6 +108,7 @@ def get_model(model_id: int) -> Response:
     """
     Get model by ID
     ---
+    openapi: 3.0.2
     tags:
       - Models
     parameters:
@@ -157,6 +160,7 @@ def update_model(model_id: int) -> Response:
     """
     Update model by ID
     ---
+    openapi: 3.0.2
     tags:
       - Models
     parameters:
@@ -219,6 +223,7 @@ def delete_model(model_id: int) -> Response:
     """
     Delete model by ID
     ---
+    openapi: 3.0.2
     tags:
       - Models
     parameters:
