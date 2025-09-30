@@ -49,7 +49,7 @@ from flask import Blueprint, jsonify, Response, request, make_response, url_for
 from my_project.auth.controller import model_controller
 from my_project.auth.domain.orders.Model import Model
 
-model_bp = Blueprint("model", __name__, url_prefix="/model")
+
 
 
 @model_bp.post("/")
